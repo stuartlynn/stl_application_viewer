@@ -1,14 +1,7 @@
-import Image from 'next/image'
 import XLSX from "xlsx"
-import Map from 'react-map-gl';
 import { STLMap } from '@/components/Map';
-import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 
 
-const geocoder = new MapboxGeocoder({
-  accessToken: process.env.NEXT_PUBLIC_MAPBOX_TOKEN!,
-  types: 'country,region,place,postcode,locality,neighborhood'
-});
 
 const column_names = [
   "Date Received",

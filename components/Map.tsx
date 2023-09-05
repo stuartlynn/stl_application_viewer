@@ -59,6 +59,7 @@ export const STLMap: React.FC<{ stls: Array<Record<string, any>> }> = ({ stls })
       >
         {stls.filter(stl => stl.geocode).map(stl =>
           <Marker
+            key={stl["UPRN"]}
             longitude={stl.geocode.geometry.coordinates[0]}
             latitude={stl.geocode.geometry.coordinates[1]}
             color={stl["Decision"] in statusColor ? statusColor[stl["Decision"]] : 'yellow'}
