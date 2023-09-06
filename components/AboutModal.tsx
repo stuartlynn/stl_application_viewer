@@ -30,7 +30,7 @@ export const AboutModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </p>
             <h3>How often will the data update?</h3>
             <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-              This site will pull in new data from the published spreadsheet every hour. I don't know how
+              This site will pull in new data from the published spreadsheet every hour. I don&apos;t know how
               often the city intends to updat the spreadsheet.
             </p>
             <h3>Who made this?</h3>
@@ -50,7 +50,7 @@ export const AboutModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
             <h3>Can I help with the site?</h3>
             <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-              It's open source baby! You can contribute if you like at <Link className="font-bold" href="https://github.com/stuartlynn/stl_application_viewer" target="__blank">https://github.com/stuartlynn/stl_application_viewer</Link>
+              It&apos;s open source baby! You can contribute if you like at <Link className="font-bold" href="https://github.com/stuartlynn/stl_application_viewer" target="__blank">https://github.com/stuartlynn/stl_application_viewer</Link>
             </p>
           </div>
         </div>
