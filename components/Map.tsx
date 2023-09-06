@@ -1,5 +1,5 @@
 "use client"
-import Map, { Marker } from "react-map-gl"
+import Map, { Marker, Popup } from "react-map-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
 import { useState } from "react"
 import { format } from "date-fns"
@@ -25,7 +25,7 @@ function formatDate(date: Date) {
 
 const STLDetails: React.FC<{ stl: Record<string, any> }> = ({ stl }) => {
   return (
-    <div className="flex border-t-radius-2 flex-col gap-4 md:overflow-y-auto md:overflow-x-hidden overflow-x-auto  align-center ">
+    <div className="flex h-full border-t-radius-2 p-2 flex-col gap-4 align-center ">
       <Stat label="Unique Property Reference Number" value={stl["UPRN"]} />
       <Stat label="Manager" value={stl["Manager"] ?? "Not Specified"} />
 
@@ -54,7 +54,7 @@ const STLDetails: React.FC<{ stl: Record<string, any> }> = ({ stl }) => {
 
 const Sidebar: React.FC<{ stl: Record<string, any>, stats: Record<string, number> }> = ({ stl, stats }) => {
   return (
-    <div className="flex flex-col md:p-2 bg-white z-20 md:w-64 w-full b-t-r-2 h-64 md:h-full">
+    <div className="flex flex-col md:p-2 bg-white z-20 md:w-64 w-full b-t-r-2 h-64 md:h-auto">
       <header className='w-full p-2 border-solid border-b-2 border-gray-600 '>
         {stl ?
           <div className="flex flex-row items-center gap-2">
@@ -65,7 +65,7 @@ const Sidebar: React.FC<{ stl: Record<string, any>, stats: Record<string, number
           <h4>Click a property to see the details of the short term let application there</h4>
         }
       </header>
-      <div className="flex-1 overflow-y-auto p-2 ">
+      <div className="flex-1 overflow-y-auto">
         {stl &&
           <STLDetails stl={stl} />
         }
@@ -92,7 +92,7 @@ export const STLMap: React.FC<{ stls: Array<Record<string, any>> }> = ({ stls })
   const [showModal, setShowModal] = useState<boolean>(false)
 
   return (
-    <div className="w-full min-h-screen flex flex-col">
+    <div className="w-full h-screen overflow-y-hidden flex flex-col">
       <NavBar onShowAbout={() => setShowModal(true)} />
       <div className='flex-1 flex h-full flex-col md:flex-row '>
         <Map
@@ -112,6 +112,7 @@ export const STLMap: React.FC<{ stls: Array<Record<string, any>> }> = ({ stls })
               latitude={stl.geocode.geometry.coordinates[1]}
               color={decisionToStatusColor(stl["Decision"])}
               onClick={() => setSelectedSTL(stl)}
+              scale={selectedSTL && (selectedSTL["UPRN"] === stl["UPRN"]) ? 2 : 1}
             />
           )}
         </Map>
