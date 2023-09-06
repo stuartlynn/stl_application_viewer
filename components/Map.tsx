@@ -3,102 +3,74 @@ import Map, { Marker } from "react-map-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
 import { useState } from "react"
 import { format } from "date-fns"
-import Link from "next/link"
 import { AboutModal } from "./AboutModal"
+import { NavBar } from "./NavBar"
+import { StatusIndicator } from "./StatusIndicator"
+import { decisionToStatusColor } from "@/utils"
 
-const statusColor: Record<string, string> = {
-  "Grant Licence": 'green',
-  "Refer to Licensing Sub Committee": 'yellow',
-  "Application Withdrawn": 'red',
+
+const Stat: React.FC<{ value: number | string, label: string }> = ({ value, label }) => {
+  return (
+    <div>
+      <p className='font-bold font-serif'>{label}</p>
+      <p className="font-sans">{value}</p>
+    </div>
+  )
+}
+
+function formatDate(date: Date) {
+  return format(date, "yyyy-MM-dd")
 }
 
 
 const STLDetails: React.FC<{ stl: Record<string, any> }> = ({ stl }) => {
   return (
-    <div style={{ display: 'grid', overflowY: "auto", gridTemplateColumns: '1fr', gap: "10px", alignItems: "center", flex: 1 }}>
-      <div>
-        <p style={{ fontWeight: "bold" }}>Unique Property Reference Number</p>
-        <p>{stl["UPRN"]}</p>
-      </div>
-
-      <div>
-        <p style={{ fontWeight: "bold" }}>Address</p>
-        <p>{stl["Premises address"]}, {stl["Postcode"]}</p>
-      </div>
-
-      <div>
-        <p style={{ fontWeight: "bold" }}>Manager</p>
-        <p>{stl["Manger"] ? stl["Manager"] : "Not Specified"}</p>
-      </div>
+    <div className="flex border-t-radius-2 flex-col gap-4 md:overflow-y-auto md:overflow-x-hidden overflow-x-auto  align-center ">
+      <Stat label="Unique Property Reference Number" value={stl["UPRN"]} />
+      <Stat label="Manager" value={stl["Manager"] ?? "Not Specified"} />
 
       {(stl["Letting Period From"] && stl["Letting Period Until"]) &&
-        <div>
-          <p style={{ fontWeight: "bold" }}>Letting Period</p>
-          <p>{format(stl["Letting Period From"], "yyyy-MM-dd")} to {format(stl["Letting Period Until"], "yyyy-MM-dd")}</p>
-        </div>
+        <Stat label="Letting Period" value={`${formatDate(stl["Letting Period From"])} to ${formatDate(stl["Letting Period Until"])}`} />
       }
 
-      <div>
-        <p style={{ fontWeight: "bold" }}>Status</p>
-        <p>{stl["Status"]}</p>
-      </div>
-
-
-      {stl["Decision"] &&
-        <div>
-          <p style={{ fontWeight: "bold" }}>Decision</p>
-          <p>{stl["Decision"]}</p>
-        </div>
-      }
+      <Stat label="Status" value={stl["Status"]} />
+      <Stat label="Decision" value={stl["Decision"]} />
 
       {stl["Decision Date"] &&
-        <div>
-          <p style={{ fontWeight: "bold" }}>Decision Date</p>
-          <p>{format(stl["Decision Date"], "yyyy-MM-dd")}</p>
-        </div>
+        <Stat label={"Decision Date"} value={formatDate(stl["Decision Date"])} />
       }
 
       {stl["Reason for Refusal - if applicatble"] &&
-        <div>
-          <p style={{ fontWeight: "bold" }}>Reason For Refusal</p>
-          <p>{stl["Reason for Refusal - if applicatble"]}</p>
-        </div>
+        <Stat label={"Reason For Refusal"} value={stl["Reason for Refusal - if applicatble"]} />
       }
 
-      <div>
-        <p style={{ fontWeight: "bold" }}>Type of Premises</p>
-        <p>{stl["Type of Premises"]}</p>
-      </div>
-
-      <div>
-        <p style={{ fontWeight: "bold" }}>Short Term Let Type</p>
-        <p>{stl["Short Term Let Type"]}</p>
-      </div>
-
-      <div>
-        <p style={{ fontWeight: "bold" }}>Maximum Occupancy</p>
-        <p>{stl["Maximum Occupancy"]}</p>
-      </div>
-
-      <div>
-        <p style={{ fontWeight: "bold" }}>Number of Bedrooms</p>
-        <p>{stl["Number of Berooms"]}</p>
-      </div>
-
+      <Stat label="Type of Premises" value={stl["Type of Premises"]} />
+      <Stat label="Short Term Let Type" value={stl["Short Term Let Type"]} />
+      <Stat label="Maximum Occupancy" value={stl["Maximum Occupancy"]} />
+      <Stat label="Number of Bedrooms" value={stl["Number of Berooms"]} />
     </div>
   )
 }
 
 const Sidebar: React.FC<{ stl: Record<string, any>, stats: Record<string, number> }> = ({ stl, stats }) => {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", flexDirection: "column", position: 'absolute', height: "calc(100vh - 60px)", boxSizing: 'border-box', padding: "20px", right: "0px", top: "60px", width: "300px", backgroundColor: "white", zIndex: 20 }}>
-
-      {stl ?
-        <STLDetails stl={stl} />
-        :
-        <h2>Click a property to see the details of the short term let application there</h2>
-      }
-      <div style={{ borderTop: "1px solid lightgray", boxSizing: 'border-box', padding: "20px" }}>
+    <div className="flex flex-col md:p-2 bg-white z-20 md:w-64 w-full b-t-r-2 h-64 md:h-full">
+      <header className='w-full p-2 border-solid border-b-2 border-gray-600 '>
+        {stl ?
+          <div className="flex flex-row items-center gap-2">
+            <StatusIndicator decision={stl["Decision"]} />
+            <h4 className="font-bold">{stl["Premises address"]}, {stl["Postcode"]}</h4>
+          </div>
+          :
+          <h4>Click a property to see the details of the short term let application there</h4>
+        }
+      </header>
+      <div className="flex-1 overflow-y-auto p-2 ">
+        {stl &&
+          <STLDetails stl={stl} />
+        }
+      </div>
+      <div className="p-2 border-solid border-t-2 border-gray-600 md:block hidden">
         <p>Total Applications: <span style={{ fontWeight: "bold", color: "black" }}>{stats.total}</span></p>
         <p style={{ color: "#008000" }}>Accepted: <span style={{ fontWeight: "bold", color: "black" }}>{stats.noAccepted}</span></p>
         <p style={{ color: "#ff0200" }}>Withdrawn / Rejected: <span style={{ fontWeight: "bold", color: "black" }}>{stats.noWithdrawn}</span></p>
@@ -117,36 +89,38 @@ export const STLMap: React.FC<{ stls: Array<Record<string, any>> }> = ({ stls })
   const noAccepted = stls.filter(s => s["Decision"] === "Grant Licence").length
   const noWithdrawn = stls.filter(s => s["Decision"] === "Application Withdrawn").length
   const noPending = stls.filter(s => !s["Decision"]).length
-  const [showAboutModal, setShowAboutModal] = useState(false)
-  console.log("Show about modal ", showAboutModal)
+  const [showModal, setShowModal] = useState<boolean>(false)
 
   return (
-    <div style={{ position: 'absolute', width: "100vw", height: "100vh" }}>
-      <div style={{ width: "100vw", display: "flex", alignItems: 'center', borderBottom: "1px solid lightgray", justifyContent: "space-between", "flexDirection": 'row', height: "60px", padding: '20px', boxSizing: 'border-box', position: "absolute", zIndex: 20, backgroundColor: "white", top: "0px", left: "0px" }}>
-        <h1>Edinburgh Short Term Let Application Explorer</h1>
-        <Link href="/about" target="__blank">About</Link>
+    <div className="w-full min-h-screen flex flex-col">
+      <NavBar onShowAbout={() => setShowModal(true)} />
+      <div className='flex-1 flex h-full flex-col md:flex-row '>
+        <Map
+          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+          initialViewState={{
+            longitude: -3.188267,
+            latitude: 55.953251,
+            zoom: 12
+          }}
+          style={{ width: "100%", height: "100%", flex: 1 }}
+          mapStyle="mapbox://styles/mapbox/streets-v9"
+        >
+          {stls.filter(stl => stl.geocode).map(stl =>
+            <Marker
+              key={stl["UPRN"]}
+              longitude={stl.geocode.geometry.coordinates[0]}
+              latitude={stl.geocode.geometry.coordinates[1]}
+              color={decisionToStatusColor(stl["Decision"])}
+              onClick={() => setSelectedSTL(stl)}
+            />
+          )}
+        </Map>
+        <Sidebar stl={selectedSTL} stats={{ noAccepted, noWithdrawn, noPending, total, notGeocoded }} />
       </div>
-      <Map
-        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-        initialViewState={{
-          longitude: -3.188267,
-          latitude: 55.953251,
-          zoom: 12
-        }}
-        style={{ width: "100vw", height: "100vh" }}
-        mapStyle="mapbox://styles/mapbox/streets-v9"
-      >
-        {stls.filter(stl => stl.geocode).map(stl =>
-          <Marker
-            key={stl["UPRN"]}
-            longitude={stl.geocode.geometry.coordinates[0]}
-            latitude={stl.geocode.geometry.coordinates[1]}
-            color={stl["Decision"] in statusColor ? statusColor[stl["Decision"]] : 'yellow'}
-            onClick={() => setSelectedSTL(stl)}
-          />
-        )}
-      </Map>
-      <Sidebar stl={selectedSTL} stats={{ noAccepted, noWithdrawn, noPending, total, notGeocoded }} />
+      {showModal &&
+        <AboutModal onClose={() => setShowModal(false)} />
+      }
+
     </div>
   )
 
